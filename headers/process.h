@@ -43,6 +43,11 @@ public:
         
     }
 
+    // [2] operator used to sort processes by arrival time
+    bool operator < (const Process& p) const {
+        return (arrival_t < p.arrival_t);
+    }
+
     // get and set //////////////////////
     int getPID() {
         return PID;
@@ -107,8 +112,12 @@ public:
     }
 
     // decrement remaining CPU burst time
-    void decCPU() {
-        this->cpu_burst_t--;
+    bool decCPU() {
+        if(cpu_burst_t > 0) {
+            this->cpu_burst_t--;
+            return true;
+        }
+        return false;
     }
 
     // increment wait time

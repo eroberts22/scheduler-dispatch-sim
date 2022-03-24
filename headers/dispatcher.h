@@ -32,10 +32,10 @@ public:
     }
 
     void simulate() {
-        test_rr1();   // round robin q = 1
-        test_rr4();   // round robin q = 4
+        //test_rr1();   // round robin q = 1
+        //test_rr4();   // round robin q = 4
         test_fcfs();  // first come first serve
-        test_spn();   // shortest process next
+        //test_spn();   // shortest process next
 
     }
 
@@ -60,6 +60,7 @@ public:
         CPU1.setProcesses(all_processes);
         CPU1.printAllProcesses();
         CPU1.FCFS();
+        CPU1.printCompleteProcesses();
         CPU1.clearAllProcesses();
     }
 
