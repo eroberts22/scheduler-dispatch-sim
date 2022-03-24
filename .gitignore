@@ -1,0 +1,7 @@
+bin/*
+.vscode/*
+*.exe
+*.json
+*/bin/*
+*/.vscode/*
+*a.out

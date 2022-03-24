@@ -1,0 +1,3 @@
+[1] https://stackoverflow.com/questions/709146/how-do-i-clear-the-stdqueue-efficiently
+
+time quantum is max number that the process can cycle

@@ -1,0 +1,3 @@
+turnaround time - accumulated time in process
+wait time - 
+response time - 
