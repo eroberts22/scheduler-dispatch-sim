@@ -1,16 +1,3 @@
-throughput time 
-avg turnaround time - accumulated time in process
-avg wait time - time in IO?
-avg response time - time in CPU?
-CPU speedup
-
-so if process starts at time 2, does accumulated time count that
-or only count the time in the process
-
-acc = io burst + cpu burst + switch between queues
-acc/turnaround = time in process, does not include arrival time - same as accumulated
-
-
 --------------------------------
 average turnaround time 
     should be W + R
@@ -24,5 +11,14 @@ average response time
     R+ when CPU front runs (should be same as CPU burst time)
 
 average throughput
-
+    sum of time for each process/number of processes
+    ie: (1 + 9 + 5)/3 = 5 clock cycle
 speedup over multiple cpus
+    ?
+
+---------------------------------
+Assumptions:
+
+- anything in the CPU queue is ready, the element at the front of the queue will be the process that is running
+- if an IO burst amount is higher than a CPU's remaining burst amount, the process has to wait in the IO queue for an IO burst
+- when IO burst is complete, it is moved back to the CPU queue, where it will be ready to finish the CPU burst 

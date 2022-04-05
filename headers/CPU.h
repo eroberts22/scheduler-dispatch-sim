@@ -1,31 +1,26 @@
 #pragma once
 // CPU.h
-#include <vector>
-#include <queue>
-#include <deque>
 #include <algorithm>
+#include <deque>
+#include <queue>
+#include <vector>
+
 #include "process.h"
 using namespace std;
 
 class CPU {
-private:
-    // all processes assigned to CPU
-    deque<Process> cpu_processes;
-    int num_proc; // track number of total processes
-    int incrementor = 0; // used to increment through cpu processes
-
-    // queues for shuffling processes between CPU and I/O
-    deque<Process> IOQ;        // I/O operation queue
-    deque<Process> CPUQ;       // CPU operation queue, element at front is the running process
+   private:
     
-    // completed processes
-    // will show order they were completed in
-    deque<Process> complete;
+    deque<Process> cpu_processes; // all processes assigned to CPU
+    deque<Process> IOQ;           // I/O operation queue
+    deque<Process> CPUQ;          // CPU operation queue, element at front is the running process
+    deque<Process> complete;      // completed processes
 
-    int clock = 0; // time in system
+    int clock = 0;                // time in system
+    int num_proc;                 // track number of total processes
+    int incrementor = 0;          // used to increment through cpu processes
 
-public:
-
+   public:
     // initialize CPU without processes
     CPU() {}
 
@@ -35,19 +30,15 @@ public:
         num_proc = v.size();
     }
 
-    deque<Process> getProcesses() {
-        return cpu_processes;
-    }
+    deque<Process> getProcesses() { return cpu_processes; }
+
+    deque<Process> getCompleteProcesses() { return complete; }
 
     void setProcesses(deque<Process> v) {
         // sort the processes by arrival time
-        sort(v.begin(), v.end()); 
+        sort(v.begin(), v.end());
         this->cpu_processes = v;
         num_proc = v.size();
-    }
-
-    void addProcess(Process p) {
-        cpu_processes.push_back(p);
     }
 
     // clear all processes from CPU, reset clock
@@ -57,12 +48,13 @@ public:
         CPUQ.clear();
         complete.clear();
         clock = 0;
+        num_proc = 0;
         incrementor = 0;
     }
 
     //////////////////////////////////////////////////////////////////////////
     //                         Printing Functions                           //
-    //////////////////////////////////////////////////////////////////////////   
+    //////////////////////////////////////////////////////////////////////////
 
     // print all processes being handled by CPU
     void printAllProcesses() {
@@ -85,30 +77,31 @@ public:
     }
 
     //////////////////////////////////////////////////////////////////////////
-    //                          Clock Utility                               //
+    //                          Clock Utilities                             //
     //////////////////////////////////////////////////////////////////////////
-    
+
+    // check processes' arrival time
     void checkProcesses() {
         // check if any processes should be pushed at clock
         while (true) {
-            if(incrementor < num_proc && cpu_processes.at(incrementor).getArrivalTime() == clock) {
+            if (incrementor < num_proc && cpu_processes.at(incrementor).getArrivalTime() == clock) {
                 CPUQ.push_back(cpu_processes.at(incrementor));
                 incrementor++;
             } else {
                 break;
             }
         }
-        if (CPUQ.empty() && IOQ.empty() && !(complete.size()==num_proc)) {
+        if (CPUQ.empty() && IOQ.empty() && !(complete.size() == num_proc)) {
             ClockInc();
         }
     }
 
-    // increment clock and add processes
+    // increment clock
     void ClockInc() {
         // increment clock
         clock++;
         // check if any processes need to be moved to cpu queue
-        if(incrementor != num_proc) {
+        if (incrementor != num_proc) {
             checkProcesses();
         }
     }
@@ -119,81 +112,81 @@ public:
 
     // handling the CPU queue for FCFS
     void FCFS_CPU() {
-        while(!CPUQ.empty()) {            
+        while (!CPUQ.empty()) {
             // if io time is greater than cpu time
-            if (CPUQ.front().move_to_IO()) { // swap to io queue
-                IOQ.push_back(CPUQ.front()); // move process to IO queue
-                CPUQ.pop_front(); // remove process from CPU queue
+            if (CPUQ.front().move_to_IO()) {  // swap to io queue
+                IOQ.push_back(CPUQ.front());  // move process to IO queue
+                CPUQ.pop_front();             // remove process from CPU queue
             } else { // keep running cpu queue
-                
+
+                CPUQ.front().decCPU();  // decrease cpu burst time
+
+                CPUQ.front().incResponse();  // inc response time
+
+                // increment wait time for processes in CPUQ, except front
+                for (int i = 1; i < CPUQ.size(); i++) {
+                    CPUQ.at(i).incWaitT();
+                }
+
                 // if both cpu and io times are 0
                 // move them to complete queue
                 if (CPUQ.front().getIOBurstTime() == 0 && CPUQ.front().getCPUBurstTime() == 0) {
                     complete.push_back(CPUQ.front());
                     CPUQ.pop_front();
                 }
-
-                CPUQ.front().decCPU(); // decrease cpu burst time
-                
-                CPUQ.front().incResponse(); // inc response time
-
-                // increment wait time for processes in CPUQ, except front
-                for (int i = 1; i < CPUQ.size(); i++) {
-                    CPUQ.at(i).incWaitT();
-                }
-            }   
+            }
             ClockInc();
         }
-        if(!IOQ.empty()) { // if io queue is not empty
+        if (!IOQ.empty()) {  // if io queue is not empty
             FCFS_IO();
-        }   
+        }
     }
 
     // handling the IO queue for FCFS
     void FCFS_IO() {
         // while io queue is not empty
-        while(!IOQ.empty()) {
-            IOQ.front().decIO(); // decrease io burst time
+        while (!IOQ.empty()) {
+            IOQ.front().decIO();  // decrease io burst time
 
             // increment wait time for processes in IOQ
-        
             for (int i = 0; i < IOQ.size(); i++) {
                 IOQ.at(i).incWaitT();
             }
 
-            if (IOQ.front().getIOBurstTime() == 0) { // if io is done, move back to cpu
+            if (IOQ.front().getIOBurstTime() == 0) {  // if io is done, move back to cpu
                 CPUQ.push_back(IOQ.front());
                 IOQ.pop_front();
             }
             ClockInc();
         }
         if (!CPUQ.empty()) {
-            FCFS_CPU(); // return to CPU
+            FCFS_CPU();  // return to CPU
         }
     }
 
     void FCFS() {
-        checkProcesses(); // check processes at clock 0
-        FCFS_CPU(); // start by running through cpu queue
+        checkProcesses();  // check processes at clock 0
+        FCFS_CPU();        // start by running through cpu queue
     }
 
     //////////////////////////////////////////////////////////////////////////
     //                             Round Robin                              //
     //////////////////////////////////////////////////////////////////////////
 
+    // handling the CPU queue for RR
     void RR_CPU(int q) {
         int counter = 0;
-        while(!CPUQ.empty()) {            
+        while (!CPUQ.empty()) {
             // if io time is greater than cpu time
-            if (CPUQ.front().move_to_IO()) { // swap to io queue
-                IOQ.push_back(CPUQ.front()); // move process to IO queue
-                CPUQ.pop_front(); // remove process from CPU queue
-                counter = 0; // if process moves to IO queue, reset to 0
-            } else { // keep running cpu queue
-                
-                CPUQ.front().decCPU(); // decrease cpu burst time
-                //cout << "process "<< CPUQ.front().getPID() << endl;
-                CPUQ.front().incResponse(); // inc response time
+            if (CPUQ.front().move_to_IO()) {  // swap to io queue
+                IOQ.push_back(CPUQ.front());  // move process to IO queue
+                CPUQ.pop_front();             // remove process from CPU queue
+                counter = 0;  // if process moves to IO queue, reset to 0
+            } else {          // keep running cpu queue
+
+                CPUQ.front().decCPU();  // decrease cpu burst time
+                // cout << "process "<< CPUQ.front().getPID() << endl;
+                CPUQ.front().incResponse();  // inc response time
 
                 // increment wait time for processes in CPUQ, except front
                 for (int i = 1; i < CPUQ.size(); i++) {
@@ -204,7 +197,8 @@ public:
                 if (CPUQ.front().getIOBurstTime() == 0 && CPUQ.front().getCPUBurstTime() == 0) {
                     complete.push_back(CPUQ.front());
                     CPUQ.pop_front();
-                    counter = 0; // if process finishes before time quantum, reset to 0
+                    counter = 0;  // if process finishes before time quantum,
+                                  // reset to 0
                 } else {
                     // counter for round robin
                     if (counter >= q) {
@@ -213,33 +207,34 @@ public:
                         CPUQ.push_back(CPUQ.front());
                         CPUQ.pop_front();
                     }
-                    counter++; 
+                    counter++;
                 }
-            }   
+            }
             ClockInc();
         }
-        if(!IOQ.empty()) { // if io queue is not empty
+        if (!IOQ.empty()) {  // if io queue is not empty
             RR_IO(q);
-        }   
+        }
     }
 
+    // handling the IO queue for RR
     void RR_IO(int q) {
-        while(!IOQ.empty()) {
-            IOQ.front().decIO(); // decrease io burst time
+        while (!IOQ.empty()) {
+            IOQ.front().decIO();  // decrease io burst time
 
             // increment wait time for processes in IOQ
             for (int i = 0; i < IOQ.size(); i++) {
                 IOQ.at(i).incWaitT();
             }
 
-            if (IOQ.front().getIOBurstTime() == 0) { // if io is done, move back to cpu
+            if (IOQ.front().getIOBurstTime() == 0) {  // if io is done, move back to cpu
                 CPUQ.push_back(IOQ.front());
                 IOQ.pop_front();
             }
             ClockInc();
         }
         if (!CPUQ.empty()) {
-            RR_CPU(q); // return to CPU
+            RR_CPU(q);  // return to CPU
         }
     }
 
@@ -251,6 +246,85 @@ public:
     //////////////////////////////////////////////////////////////////////////
     //                       Shortest Process Next                          //
     //////////////////////////////////////////////////////////////////////////
-    void SPN() {}
+
+    // handling the CPU queue for SPN
+    void SPN_CPU() {
+        int shortest;
+        deque<int>::iterator it;
+
+        while (!CPUQ.empty()) {
+            shortest = 0;
+            // if io time is greater than cpu time
+            if (CPUQ.front().move_to_IO()) {  // swap to io queue
+                IOQ.push_back(CPUQ.front());  // move process to IO queue
+                CPUQ.pop_front();             // remove process from CPU queue
+            } else {                          // keep running cpu queue
+
+                CPUQ.front().decCPU();  // decrease cpu burst time
+
+                CPUQ.front().incResponse();  // inc response time
+
+                // increment wait time for processes in CPUQ, except front
+                for (int i = 1; i < CPUQ.size(); i++) {
+                    CPUQ.at(i).incWaitT();
+                }
+
+                // if both cpu and io times are 0
+                // move them to complete queue
+                if (CPUQ.front().getIOBurstTime() == 0 && CPUQ.front().getCPUBurstTime() == 0) {
+                    complete.push_back(CPUQ.front());
+                    CPUQ.pop_front();
+                }
+
+                // find process with least amount of time left for cpu burst
+                // move process with shortest time to front
+                for (int i = 0; i < CPUQ.size(); i++) {
+                    if (CPUQ.at(i).getCPUBurstTime() < CPUQ.at(shortest).getCPUBurstTime()) {
+                        shortest = i; // location of shortest cpu burst time
+                    }
+                }
+
+                // move shortest process to the front
+                if (!CPUQ.empty()) {
+                    if (CPUQ.size() > 1) {
+                        CPUQ.push_front(CPUQ.at(shortest));
+                        CPUQ.erase(CPUQ.begin()+shortest+1);
+                    }
+                    
+                }
+            }
+            ClockInc();
+        }
+        if (!IOQ.empty()) {  // if io queue is not empty
+            SPN_IO();
+        }
+    }
+
+    // handling the IO queue for SPN
+    void SPN_IO() {
+        // while io queue is not empty
+        while (!IOQ.empty()) {
+            IOQ.front().decIO();  // decrease io burst time
+
+            // increment wait time for processes in IOQ
+            for (int i = 0; i < IOQ.size(); i++) {
+                IOQ.at(i).incWaitT();
+            }
+
+            if (IOQ.front().getIOBurstTime() == 0) {  // if io is done, move back to cpu
+                CPUQ.push_back(IOQ.front());
+                IOQ.pop_front();
+            }
+            ClockInc();
+        }
+        if (!CPUQ.empty()) {
+            SPN_CPU();  // return to CPU
+        }
+    }
+
+    void SPN() {
+        checkProcesses();
+        SPN_CPU();
+    }
 
 };

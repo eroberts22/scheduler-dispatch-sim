@@ -1,0 +1,5 @@
+test,avg.wait,avg.response,avg.turnaround
+RR1,27,8,36
+RR4,22,8,31
+FCFS,16,8,25
+SPN,16,8,25
