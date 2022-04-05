@@ -7,11 +7,14 @@ class Process {
 private:
     int PID;
     int arrival_t;      // starting time
-    int cpu_burst_t;    // amount of time in cpu queue
-    int io_burst_t;     // amount of time in io queue
-    int accumulated_t;  // total amount of time
+    int cpu_burst_t;    // amount of time in cpu queue, will be decremented
+    int io_burst_t;     // amount of time in io queue, will be decremented
+    int turnaround_t;   // time in system - includes bursts and wait time
     int wait_t;         // amount of time waiting 
     int response_t;     // how long response time is
+
+    int o_cpu_burst_t;  // overall cpu burst
+    int o_io_burst_t;   // overall io burst
 public:
     Process () {}
     ~Process() {}
@@ -23,7 +26,9 @@ public:
         setIOBurstTime(i);
         setWaitTime(0);
         setResponseTime(0);
-        setAccTime(0);
+        setTurnTime(0);
+        setOCPUBurstTime(c);
+        setOIOBurstTime(i);
     }
 
     // true if process io time is greater than cpu time
@@ -37,9 +42,11 @@ public:
     string getAllInfo() {
         return to_string(getPID()) 
         + " |   " + to_string(getArrivalTime()) 
-        + " |   " + to_string(getCPUBurstTime()) 
-        + " |   " + to_string(getIOBurstTime()) 
-        + " |   " + to_string(getAccTime());
+        + " |   " + to_string(getOCPUBurstTime()) 
+        + " |   " + to_string(getOIOBurstTime()) 
+        + " |    " + to_string(getWaitTime()) 
+        + " |    " + to_string(getResponseTime()) 
+        + " |    " + to_string(getTurnTime());
         
     }
 
@@ -65,9 +72,8 @@ public:
         return io_burst_t;
     }
 
-    // same as turnaround?
-    int getAccTime() {
-        return accumulated_t;
+    int getTurnTime() {
+        return turnaround_t;
     }
 
     int getWaitTime() {
@@ -77,6 +83,15 @@ public:
     int getResponseTime() {
         return response_t;
     }
+
+    int getOCPUBurstTime() {
+        return o_cpu_burst_t;
+    }
+
+    int getOIOBurstTime() {
+        return o_io_burst_t;
+    }
+
 
     void setPID(int n) {
         this->PID = n;
@@ -94,8 +109,8 @@ public:
         this->io_burst_t = n;
     }
         
-    void setAccTime(int n) {
-        this->accumulated_t = n;
+    void setTurnTime(int n) {
+        this->turnaround_t = n;
     }
 
     void setWaitTime(int n) {
@@ -106,22 +121,41 @@ public:
         this->response_t = n;
     }
 
+    void setOCPUBurstTime(int n) {
+        this->o_cpu_burst_t = n;
+    }
+
+    void setOIOBurstTime(int n) {
+        this->o_io_burst_t = n;
+    }
+
     // decrement remaining I/O burst time
     void decIO() {
-        this->io_burst_t--;
+        if(io_burst_t > 0) {
+            this->io_burst_t--;
+        }
     }
 
     // decrement remaining CPU burst time
-    bool decCPU() {
+    void decCPU() {
         if(cpu_burst_t > 0) {
             this->cpu_burst_t--;
-            return true;
-        }
-        return false;
+        } 
+    }
+
+    void incTurnT() {
+        this->turnaround_t++;
     }
 
     // increment wait time
-
+    void incWaitT() {
+        this->wait_t++;
+        this->turnaround_t++;
+    }
 
     // increment response time
+    void incResponse() {
+        this->response_t++;
+        this->turnaround_t++;
+    }
 };

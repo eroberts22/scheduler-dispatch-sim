@@ -1,3 +1,28 @@
-turnaround time - accumulated time in process
-wait time - 
-response time - 
+throughput time 
+avg turnaround time - accumulated time in process
+avg wait time - time in IO?
+avg response time - time in CPU?
+CPU speedup
+
+so if process starts at time 2, does accumulated time count that
+or only count the time in the process
+
+acc = io burst + cpu burst + switch between queues
+acc/turnaround = time in process, does not include arrival time - same as accumulated
+
+
+--------------------------------
+average turnaround time 
+    should be W + R
+    or 
+    exit time - arrival time
+
+average wait time
+    W+ all elements in IO queue and all elements in CPUQ that are not front element
+
+average response time
+    R+ when CPU front runs (should be same as CPU burst time)
+
+average throughput
+
+speedup over multiple cpus
