@@ -106,6 +106,13 @@ class CPU {
         }
     }
 
+    void calcResponse() {
+        for (int i = 0; i < complete.size(); i++) {
+            complete.at(i).calcRespT();
+            complete.at(i).calcTurnT();
+        }
+    }
+
     //////////////////////////////////////////////////////////////////////////
     //                       First Come First Serve                         //
     //////////////////////////////////////////////////////////////////////////
@@ -113,6 +120,10 @@ class CPU {
     // handling the CPU queue for FCFS
     void FCFS_CPU() {
         while (!CPUQ.empty()) {
+            // time upon which process first gets to cpu
+            if (CPUQ.front().getFCPUTime() == -1) {
+                CPUQ.front().setFCPUTime(clock);
+            }
             // if io time is greater than cpu time
             if (CPUQ.front().move_to_IO()) {  // swap to io queue
                 IOQ.push_back(CPUQ.front());  // move process to IO queue
@@ -121,7 +132,7 @@ class CPU {
 
                 CPUQ.front().decCPU();  // decrease cpu burst time
 
-                CPUQ.front().incResponse();  // inc response time
+                //CPUQ.front().incResponse();  // inc response time
 
                 // increment wait time for processes in CPUQ, except front
                 for (int i = 1; i < CPUQ.size(); i++) {
@@ -131,6 +142,7 @@ class CPU {
                 // if both cpu and io times are 0
                 // move them to complete queue
                 if (CPUQ.front().getIOBurstTime() == 0 && CPUQ.front().getCPUBurstTime() == 0) {
+                    //CPUQ.front().setExitTime(clock+1);
                     complete.push_back(CPUQ.front());
                     CPUQ.pop_front();
                 }
@@ -167,6 +179,7 @@ class CPU {
     void FCFS() {
         checkProcesses();  // check processes at clock 0
         FCFS_CPU();        // start by running through cpu queue
+        calcResponse();
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -177,6 +190,10 @@ class CPU {
     void RR_CPU(int q) {
         int counter = 0;
         while (!CPUQ.empty()) {
+            // time upon which process first gets to cpu
+            if (CPUQ.front().getFCPUTime() == -1) {
+                CPUQ.front().setFCPUTime(clock);
+            }
             // if io time is greater than cpu time
             if (CPUQ.front().move_to_IO()) {  // swap to io queue
                 IOQ.push_back(CPUQ.front());  // move process to IO queue
@@ -186,7 +203,7 @@ class CPU {
 
                 CPUQ.front().decCPU();  // decrease cpu burst time
                 // cout << "process "<< CPUQ.front().getPID() << endl;
-                CPUQ.front().incResponse();  // inc response time
+                //CPUQ.front().incResponse();  // inc response time
 
                 // increment wait time for processes in CPUQ, except front
                 for (int i = 1; i < CPUQ.size(); i++) {
@@ -195,6 +212,7 @@ class CPU {
                 // if both cpu and io times are 0
                 // move them to complete queue
                 if (CPUQ.front().getIOBurstTime() == 0 && CPUQ.front().getCPUBurstTime() == 0) {
+                    //CPUQ.front().setExitTime(clock+1);
                     complete.push_back(CPUQ.front());
                     CPUQ.pop_front();
                     counter = 0;  // if process finishes before time quantum,
@@ -241,6 +259,7 @@ class CPU {
     void RR(int q) {
         checkProcesses();
         RR_CPU(q);
+        calcResponse();
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -254,6 +273,10 @@ class CPU {
 
         while (!CPUQ.empty()) {
             shortest = 0;
+            // time upon which process first gets to cpu
+            if (CPUQ.front().getFCPUTime() == -1) {
+                CPUQ.front().setFCPUTime(clock);
+            }
             // if io time is greater than cpu time
             if (CPUQ.front().move_to_IO()) {  // swap to io queue
                 IOQ.push_back(CPUQ.front());  // move process to IO queue
@@ -262,7 +285,7 @@ class CPU {
 
                 CPUQ.front().decCPU();  // decrease cpu burst time
 
-                CPUQ.front().incResponse();  // inc response time
+                //CPUQ.front().incResponse();  // inc response time
 
                 // increment wait time for processes in CPUQ, except front
                 for (int i = 1; i < CPUQ.size(); i++) {
@@ -272,6 +295,7 @@ class CPU {
                 // if both cpu and io times are 0
                 // move them to complete queue
                 if (CPUQ.front().getIOBurstTime() == 0 && CPUQ.front().getCPUBurstTime() == 0) {
+                    //CPUQ.front().setExitTime(clock+1);
                     complete.push_back(CPUQ.front());
                     CPUQ.pop_front();
                 }
@@ -290,7 +314,6 @@ class CPU {
                         CPUQ.push_front(CPUQ.at(shortest));
                         CPUQ.erase(CPUQ.begin()+shortest+1);
                     }
-                    
                 }
             }
             ClockInc();
@@ -325,6 +348,7 @@ class CPU {
     void SPN() {
         checkProcesses();
         SPN_CPU();
+        calcResponse();
     }
 
 };

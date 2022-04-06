@@ -10,7 +10,7 @@ average wait time
 average response time
     R+ when CPU front runs (should be same as CPU burst time)
 
-average throughput
+throughput
     sum of time for each process/number of processes
     ie: (1 + 9 + 5)/3 = 5 clock cycle
 speedup over multiple cpus

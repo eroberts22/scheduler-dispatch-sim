@@ -1,5 +1,7 @@
 test,avg.wait,avg.response,avg.turnaround
-RR1,27,8,36
-RR4,22,8,31
-FCFS,16,8,25
-SPN,16,8,25
+RR1,50,11,54
+RR4,49,25,53
+FCFS,42,32,46
+SPN,34,21,38
+MULT.FCFS.TWO,19,13,23
+MULT.SPN.TWO,15,8,19

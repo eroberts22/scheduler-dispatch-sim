@@ -5,8 +5,9 @@ using namespace std;
 
 class Process {
    private:
-    int PID;
+    int PID;           // process id
     int arrival_t;     // starting time
+    int first_cpu_t;        // exit time
     int cpu_burst_t;   // amount of time in cpu queue, will be decremented
     int io_burst_t;    // amount of time in io queue, will be decremented
     int turnaround_t;  // time in system - includes bursts and wait time
@@ -15,6 +16,7 @@ class Process {
 
     int o_cpu_burst_t;  // overall cpu burst
     int o_io_burst_t;   // overall io burst
+       
    public:
     Process() {}
     ~Process() {}
@@ -22,6 +24,7 @@ class Process {
     Process(int p, int a, int c, int i) {
         setPID(p);
         setArrivalTime(a);
+        setFCPUTime(-1);
         setCPUBurstTime(c);
         setIOBurstTime(i);
         setWaitTime(0);
@@ -43,6 +46,8 @@ class Process {
     }
 
     string getAllInfo() {
+        calcRespT();
+        calcTurnT();
         return to_string(getPID()) 
         + " |   " + to_string(getArrivalTime()) 
         + " |   " + to_string(getOCPUBurstTime()) 
@@ -59,6 +64,8 @@ class Process {
     int getPID() { return PID; }
 
     int getArrivalTime() { return arrival_t; }
+
+    int getFCPUTime() { return first_cpu_t; }
 
     int getCPUBurstTime() { return cpu_burst_t; }
 
@@ -77,6 +84,8 @@ class Process {
     void setPID(int n) { this->PID = n; }
 
     void setArrivalTime(int n) { this->arrival_t = n; }
+
+    void setFCPUTime(int n) { this->first_cpu_t = n; }
 
     void setCPUBurstTime(int n) { this->cpu_burst_t = n; }
 
@@ -106,17 +115,18 @@ class Process {
         }
     }
 
-    void incTurnT() { this->turnaround_t++; }
-
     // increment wait time
     void incWaitT() {
         this->wait_t++;
         this->turnaround_t++;
     }
 
-    // increment response time
-    void incResponse() {
-        this->response_t++;
-        this->turnaround_t++;
+    void calcRespT() {
+        this->response_t = this->first_cpu_t - this->arrival_t;
     }
+
+    void calcTurnT() {
+        this->turnaround_t = this->wait_t + this->o_cpu_burst_t;
+    }
+
 };
