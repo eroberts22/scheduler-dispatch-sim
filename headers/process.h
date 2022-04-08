@@ -1,13 +1,15 @@
 #pragma once
 // Process.h
 #include <string>
+#include <iomanip>
 using namespace std;
 
 class Process {
    private:
     int PID;           // process id
     int arrival_t;     // starting time
-    int first_cpu_t;        // exit time
+    int first_cpu_t;   // time process first reaches cpu
+    int exit_t;         // time process exits the cpu
     int cpu_burst_t;   // amount of time in cpu queue, will be decremented
     int io_burst_t;    // amount of time in io queue, will be decremented
     int turnaround_t;  // time in system - includes bursts and wait time
@@ -25,6 +27,7 @@ class Process {
         setPID(p);
         setArrivalTime(a);
         setFCPUTime(-1);
+        setExitTime(0);
         setCPUBurstTime(c);
         setIOBurstTime(i);
         setWaitTime(0);
@@ -44,17 +47,29 @@ class Process {
             return false;
         }
     }
-
+/*
     string getAllInfo() {
         calcRespT();
         calcTurnT();
         return to_string(getPID()) 
-        + " |   " + to_string(getArrivalTime()) 
+        + " |   " + to_string(getArrivalTime())
         + " |   " + to_string(getOCPUBurstTime()) 
         + " |   " + to_string(getOIOBurstTime()) 
         + " |    " + to_string(getWaitTime()) 
         + " |    " + to_string(getResponseTime()) 
         + " |    " + to_string(getTurnTime());
+    }*/
+
+    void getAllInfo() {
+        calcRespT();
+        calcTurnT();
+        cout << setw(3) << getPID() 
+        << "|" << setw(5) << getArrivalTime()
+        << "|" << setw(5) << getOCPUBurstTime()
+        << "|" << setw(5) << getOIOBurstTime()
+        << "|" << setw(6) << getWaitTime()
+        << "|" << setw(6) << getResponseTime()
+        << "|" << setw(6) << getTurnTime() << endl;
     }
 
     // [2] operator used to sort processes by arrival time
@@ -66,6 +81,8 @@ class Process {
     int getArrivalTime() { return arrival_t; }
 
     int getFCPUTime() { return first_cpu_t; }
+
+    int getExitTime() { return exit_t; }
 
     int getCPUBurstTime() { return cpu_burst_t; }
 
@@ -86,6 +103,8 @@ class Process {
     void setArrivalTime(int n) { this->arrival_t = n; }
 
     void setFCPUTime(int n) { this->first_cpu_t = n; }
+
+    void setExitTime(int n) { this->exit_t = n; }
 
     void setCPUBurstTime(int n) { this->cpu_burst_t = n; }
 
@@ -126,7 +145,8 @@ class Process {
     }
 
     void calcTurnT() {
-        this->turnaround_t = this->wait_t + this->o_cpu_burst_t;
+        this->turnaround_t = this->exit_t - this->arrival_t;
+        //this->turnaround_t = this->wait_t + this->o_cpu_burst_t;
     }
 
 };

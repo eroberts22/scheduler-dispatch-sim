@@ -1,14 +1,12 @@
 --------------------------------
 average turnaround time 
-    should be W + R
-    or 
     exit time - arrival time
 
 average wait time
     W+ all elements in IO queue and all elements in CPUQ that are not front element
 
 average response time
-    R+ when CPU front runs (should be same as CPU burst time)
+    first time process reaches CPU - arrival time
 
 throughput
     sum of time for each process/number of processes

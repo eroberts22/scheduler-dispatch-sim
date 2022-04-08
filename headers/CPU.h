@@ -58,20 +58,22 @@ class CPU {
 
     // print all processes being handled by CPU
     void printAllProcesses() {
-        cout << "PID |Arr_t|CPU_t|IO_t |Wait_t|Resp_t|Turn_t\n";
-        cout << "----|-----|-----|-----|------|------|------\n";
+        cout << "PID|Arr_t|CPU_t|IO_t |Wait_t|Resp_t|Turn_t\n";
+        cout << "---|-----|-----|-----|------|------|------\n";
         for (int i = 0; i < cpu_processes.size(); i++) {
-            cout << cpu_processes.at(i).getAllInfo() << endl;
+            //cout << cpu_processes.at(i).getAllInfo() << endl;
+            cpu_processes.at(i).getAllInfo();
         }
         cout << endl;
     }
 
     // print all processes completed by CPU
     void printCompleteProcesses() {
-        cout << "PID |Arr_t|CPU_t|IO_t |Wait_t|Resp_t|Turn_t\n";
-        cout << "----|-----|-----|-----|------|------|------\n";
+        cout << "PID|Arr_t|CPU_t|IO_t |Wait_t|Resp_t|Turn_t\n";
+        cout << "---|-----|-----|-----|------|------|------\n";
         for (int i = 0; i < complete.size(); i++) {
-            cout << complete.at(i).getAllInfo() << endl;
+            //cout << complete.at(i).getAllInfo() << endl;
+            complete.at(i).getAllInfo();
         }
         cout << endl;
     }
@@ -142,7 +144,7 @@ class CPU {
                 // if both cpu and io times are 0
                 // move them to complete queue
                 if (CPUQ.front().getIOBurstTime() == 0 && CPUQ.front().getCPUBurstTime() == 0) {
-                    //CPUQ.front().setExitTime(clock+1);
+                    CPUQ.front().setExitTime(clock+1);
                     complete.push_back(CPUQ.front());
                     CPUQ.pop_front();
                 }
@@ -212,7 +214,7 @@ class CPU {
                 // if both cpu and io times are 0
                 // move them to complete queue
                 if (CPUQ.front().getIOBurstTime() == 0 && CPUQ.front().getCPUBurstTime() == 0) {
-                    //CPUQ.front().setExitTime(clock+1);
+                    CPUQ.front().setExitTime(clock+1);
                     complete.push_back(CPUQ.front());
                     CPUQ.pop_front();
                     counter = 0;  // if process finishes before time quantum,
@@ -295,7 +297,7 @@ class CPU {
                 // if both cpu and io times are 0
                 // move them to complete queue
                 if (CPUQ.front().getIOBurstTime() == 0 && CPUQ.front().getCPUBurstTime() == 0) {
-                    //CPUQ.front().setExitTime(clock+1);
+                    CPUQ.front().setExitTime(clock+1);
                     complete.push_back(CPUQ.front());
                     CPUQ.pop_front();
                 }
